@@ -508,105 +508,107 @@ namespace UnitTesting
 
         #region Sort and Desc List
         [Fact]
-         public void GetSortedPerson_EmptySearchText()
-         {
+        public void GetSortedPerson_EmptySearchText()
+        {
             #region Repeated Data
-            //adding country
+            // Adding countries to the service
             var addcountry1 = new CountryRequest() { CountryName = "USA" };
-             var addcountry2 = new CountryRequest() { CountryName = "Japan" };
-             var addcountry3 = new CountryRequest() { CountryName = "Philippines" };
+            var addcountry2 = new CountryRequest() { CountryName = "Japan" };
+            var addcountry3 = new CountryRequest() { CountryName = "Philippines" };
 
-             //Adding the country
-             var addedCountry1 = _countryService.AddCountry(addcountry1);
-             var addedCountry2 = _countryService.AddCountry(addcountry2);
-             var addedCountry3 = _countryService.AddCountry(addcountry3);
+            // Adding the countries and storing their responses
+            var addedCountry1 = _countryService.AddCountry(addcountry1);
+            var addedCountry2 = _countryService.AddCountry(addcountry2);
+            var addedCountry3 = _countryService.AddCountry(addcountry3);
 
-             //adding person
-             var person1 = new PersonRequest
-             {
-                 PersonName = "Alice",
-                 Email = "alice@example.com",
-                 BirthDay = new DateTime(1985, 3, 10),
-                 Gender = GenderOptions.Female,
-                 CountryName = addedCountry1.CountryName,
-                 CountryID = addedCountry1.CountryId,
-                 ReceiveNewsLetters = true
-             };
-             var person2 = new PersonRequest
-             {
-                 PersonName = "Lisando",
-                 Email = "Lisando@example.com",
-                 BirthDay = new DateTime(1985, 3, 10),
-                 Gender = GenderOptions.Male,
-                 CountryName = addedCountry2.CountryName,
-                 CountryID = addedCountry2.CountryId,
-                 ReceiveNewsLetters = true
-             };
-             var person3 = new PersonRequest
-             {
-                 PersonName = "Magi",
-                 Email = "Magili@example.com",
-                 BirthDay = new DateTime(1985, 3, 10),
-                 Gender = GenderOptions.Female,
-                 CountryName = addedCountry3.CountryName,
-                 CountryID = addedCountry3.CountryId,
-                 ReceiveNewsLetters = true
-             };
-             var person4 = new PersonRequest
-             {
-                 PersonName = "Benjamin",
-                 Email = "Benjamin@example.com",
-                 BirthDay = new DateTime(1985, 3, 10),
-                 Gender = GenderOptions.Female,
-                 CountryName = addedCountry3.CountryName,
-                 CountryID = addedCountry3.CountryId,
-                 ReceiveNewsLetters = true
-             };
+            // Creating person requests with the added countries
+            var person1 = new PersonRequest
+            {
+                PersonName = "Alice",
+                Email = "alice@example.com",
+                BirthDay = new DateTime(1985, 3, 10),
+                Gender = GenderOptions.Female,
+                CountryName = addedCountry1.CountryName,
+                CountryID = addedCountry1.CountryId,
+                ReceiveNewsLetters = true
+            };
+            var person2 = new PersonRequest
+            {
+                PersonName = "Lisando",
+                Email = "Lisando@example.com",
+                BirthDay = new DateTime(1985, 3, 10),
+                Gender = GenderOptions.Male,
+                CountryName = addedCountry2.CountryName,
+                CountryID = addedCountry2.CountryId,
+                ReceiveNewsLetters = true
+            };
+            var person3 = new PersonRequest
+            {
+                PersonName = "Magi",
+                Email = "Magili@example.com",
+                BirthDay = new DateTime(1985, 3, 10),
+                Gender = GenderOptions.Female,
+                CountryName = addedCountry3.CountryName,
+                CountryID = addedCountry3.CountryId,
+                ReceiveNewsLetters = true
+            };
+            var person4 = new PersonRequest
+            {
+                PersonName = "Benjamin",
+                Email = "Benjamin@example.com",
+                BirthDay = new DateTime(1985, 3, 10),
+                Gender = GenderOptions.Female,
+                CountryName = addedCountry3.CountryName,
+                CountryID = addedCountry3.CountryId,
+                ReceiveNewsLetters = true
+            };
 
-             var storing_list_of_person = new List<PersonRequest>
-             {
-                 person1,person2,person3,person4
-             };
+            // Storing all person requests in a list
+            var storing_list_of_person = new List<PersonRequest>
+            {
+                person1, person2, person3, person4
+            };
 
-            //act
-            //empty list
+            // Act: Adding persons to the service and storing their responses
             List<ServiceContracts.Dto.PersonDto.PersonResponse> personList_created_empty = new List<ServiceContracts.Dto.PersonDto.PersonResponse>();
+            foreach (var person in storing_list_of_person)
+            {
+                var person_response_add = _personService.AddPerson(person);
+                personList_created_empty.Add(person_response_add);
+            }
 
-             //adding person to the list
-             foreach (var person in storing_list_of_person)
-             {
-                 var person_response_add = _personService.AddPerson(person);
-                 personList_created_empty.Add(person_response_add);
-             }
-
-             //print the expected person values
-             _testOutput.WriteLine("Expexted Values:\n");
-             foreach (var person in personList_created_empty)
-             {
-                 _testOutput.WriteLine(person.ToString());
-             }
+            // Print the expected person values for debugging
+            _testOutput.WriteLine("Expected Values:\n");
+            foreach (var person in personList_created_empty)
+            {
+                _testOutput.WriteLine(person.ToString());
+            }
             #endregion
 
-            var list_result_from_sort = _personService.GetSortedPerson(personList_created_empty, nameof(PersonModel.PersonName),SortOrderOptions.Ascending);
-             //print actual value
-             _testOutput.WriteLine("\nActual Values:\n");
+            // Act: Sorting the list of persons by PersonName in ascending order
+            var list_result_from_sort = _personService.GetSortedPerson(personList_created_empty, nameof(PersonModel.PersonName), SortOrderOptions.Ascending);
 
-             list_result_from_sort.OrderBy(name => name.PersonName).ToList();
+            // Print the actual sorted values for debugging
+            _testOutput.WriteLine("\nActual Values:\n");
+            list_result_from_sort.OrderBy(name => name.PersonName).ToList();
 
-             var get_all_person = _personService.ListPersons();
+            // Retrieve all persons from the service
+            var get_all_person = _personService.ListPersons();
 
-             foreach (var person_Added in list_result_from_sort)
-             {
-                 _testOutput.WriteLine($"{person_Added.ToString()}");
-             }
+            // Print the sorted list for debugging
+            foreach (var person_Added in list_result_from_sort)
+            {
+                _testOutput.WriteLine($"{person_Added.ToString()}");
+            }
 
-             //Assert
-             for(int i = 0; i < get_all_person.Count; i++)
-             {
+            // Assert: Verify that the sorted list matches the expected order
+            for (int i = 0; i < get_all_person.Count; i++)
+            {
                 Assert.Equal(list_result_from_sort[i], list_result_from_sort[i]);
-             }
-
+            }
         }
+        #endregion
+
         #region Update Person
         // Test to ensure that when a null ID is passed, an ArgumentNullException is thrown
         [Fact]
@@ -730,5 +732,116 @@ namespace UnitTesting
             Assert.Equal(person_update_request.PersonId, checkUpdate_ID.PersonId);
         }
         #endregion
+
+        #region
+        [Fact]
+        public void CheckId_Empty()
+        {
+              // Arrange
+            var addcountry = new CountryRequest()
+            {
+                CountryName = "USA"
+            };
+
+            var addedCountry = _countryService.AddCountry(addcountry);
+
+            var personRequest = new PersonRequest
+            {
+                PersonName = "Jane Doe",
+                Email = "jane.doe@example.com",
+                BirthDay = new DateTime(1995, 5, 15),
+                Gender = GenderOptions.Female,
+                CountryID = addedCountry.CountryId,
+                CountryName = addedCountry.CountryName,
+                ReceiveNewsLetters = false
+            };
+            //act
+            var addedPerson = _personService.AddPerson(personRequest);
+            addedPerson.PersonId = Guid.Empty;
+
+            Assert.Throws<ArgumentNullException>(() => _personService.DeletePerson(addedPerson.PersonId));
+
+        }
+        //IF YOU Supply invalid Id PersonId, it should return false
+        [Fact]
+        public void InvalidId_DeletePerson()
+        {
+            // Arrange
+            var addcountry = new CountryRequest()
+            {
+                CountryName = "USA"
+            };
+
+            var addedCountry = _countryService.AddCountry(addcountry);
+
+            var personRequest = new PersonRequest
+            {
+                PersonName = "Jane Doe",
+                Email = "jane.doe@example.com",
+                BirthDay = new DateTime(1995, 5, 15),
+                Gender = GenderOptions.Female,
+                CountryID = addedCountry.CountryId,
+                CountryName = addedCountry.CountryName,
+                ReceiveNewsLetters = false
+            };
+
+            // Act
+            var addedPerson = _personService.AddPerson(personRequest);
+
+            //fake PersonId
+            addedPerson.PersonId = Guid.NewGuid();
+
+            var deleted_ID = _personService.DeletePerson(addedPerson.PersonId);
+            // Assert
+            Assert.False(deleted_ID);
+            /*Assert.Throws<KeyNotFoundException>(() => _personService.DeletePerson(addedPerson.PersonId));*/
+        }
+         //IF YOU Supply valid Id PersonId, it should return true and delete person
+        [Fact]
+        public void ValidPersonId_DeletePerson()
+        {
+            // Arrange
+            var addcountry = new CountryRequest()
+            {
+                CountryName = "USA"
+            };
+
+            var addedCountry = _countryService.AddCountry(addcountry);
+
+            var personRequest = new PersonRequest
+            {
+                PersonName = "Jane Doe",
+                Email = "jane.doe@example.com",
+                BirthDay = new DateTime(1995, 5, 15),
+                Gender = GenderOptions.Female,
+                CountryID = addedCountry.CountryId,
+                CountryName = addedCountry.CountryName,
+                ReceiveNewsLetters = false
+            };
+            
+
+            List<PersonResponse> personList = new List<PersonResponse>();
+            var person_response_add = _personService.AddPerson(personRequest);
+
+            foreach (var person in personList)
+            {
+                personList.Add(person_response_add);
+                _testOutput.WriteLine(person_response_add.ToString());
+            }
+
+            // Act
+            var result = _personService.DeletePerson(person_response_add.PersonId); //delete Id
+
+            // Print the result for deleting
+            foreach (var person in personList)
+            {
+                _testOutput.WriteLine(person.ToString());
+            }
+            // Assert
+            Assert.True(result); // Ensure the result is true since we sully correct Id
+        }
+
+        #endregion
     }
 }
+

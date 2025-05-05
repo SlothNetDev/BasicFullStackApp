@@ -46,6 +46,7 @@ namespace BussinessLogicService
             return personResponse;
         }
 
+        #region ADD PERSON
         /// <summary>
         /// Adds a new person to the list of persons.
         /// </summary>
@@ -80,12 +81,21 @@ namespace BussinessLogicService
             //getting the countryName from country service
             return PersonIntoPersonResponse(person);
         }
-
+        #endregion
+        #region GET PERSON BY ID
+        /// <summary>
+        /// Retrieves a person by their unique ID.
+        /// </summary>
+        /// <param name="personId">The unique identifier of the person to retrieve.</param>
+        /// <returns>A PersonResponse object containing the person's details.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the personId is null.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when the person or their country is not found.</exception>
         public ServiceContracts.Dto.PersonDto.PersonResponse GetPersonByID(Guid? personId)
         {
             // Validate the input ID
             ModelValidation.ValidateId(personId);
 
+            // Find the person in the list by their ID
             var person = _persons.FirstOrDefault(x => x.PersonId == personId); //returns null if not found
 
             if (person == null)
@@ -95,24 +105,41 @@ namespace BussinessLogicService
             if (person.CountryID == null || !_countries.ListCountry().Any(c => c.CountryId == person.CountryID))
                 throw new KeyNotFoundException($"Country with ID {person.CountryID} not found.");
 
+            // Convert the person model to a response DTO
             return PersonIntoPersonResponse(person);
         }
-
-
+        #endregion
+        #region ListPerson
+        /// <summary>
+        /// Retrieves a list of all persons.
+        /// </summary>
+        /// <returns>A list of PersonResponse objects containing details of all persons.</returns>
         public List<ServiceContracts.Dto.PersonDto.PersonResponse> ListPersons()
         {
-            // Convert each PersonUpdateResponse in the list to a PersonResponseDto
+            // Convert each PersonModel in the list to a PersonResponseDto
             return _persons.Select(person => PersonIntoPersonResponse(person)).ToList();
         }
-
+        #endregion
+        #region GetFilteredPerson
+        /// <summary>
+        /// Filters the list of persons based on a search criterion.
+        /// </summary>
+        /// <param name="searchby">The property to search by (e.g., PersonName, Email).</param>
+        /// <param name="searchString">The search string to filter by.</param>
+        /// <returns>A filtered list of PersonResponse objects.</returns>
         public List<ServiceContracts.Dto.PersonDto.PersonResponse> GetFilteredPerson(string searchby, string? searchString)
         {
+            // Retrieve all persons
             var allPerson = ListPersons();
 
+            // Hold the filtered data
             var holdAllPerson_Data = allPerson;
+
+            // If search criteria are empty, return all persons
             if (string.IsNullOrWhiteSpace(searchby) || string.IsNullOrWhiteSpace(searchString))
                 return holdAllPerson_Data;
 
+            // Filter based on the specified property
             switch (searchby)
             {
                 case nameof(PersonResponse.PersonName):
@@ -136,12 +163,21 @@ namespace BussinessLogicService
                     holdAllPerson_Data = allPerson.Where(allPerson => allPerson.CountryName != null &&
                     allPerson.CountryName.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
                     break;
-                default: holdAllPerson_Data = allPerson;
+                default:
+                    holdAllPerson_Data = allPerson;
                     break;
             }
             return holdAllPerson_Data;
         }
-
+        #endregion
+        #region GetSortedPerson
+        /// <summary>
+        /// Sorts a list of persons based on a specified property and order.
+        /// </summary>
+        /// <param name="allPerson">The list of persons to sort.</param>
+        /// <param name="sortby">The property to sort by (e.g., PersonName, Email).</param>
+        /// <param name="sortOrder">The order to sort in (Ascending or Descending).</param>
+        /// <returns>A sorted list of PersonResponse objects.</returns>
         public List<ServiceContracts.Dto.PersonDto.PersonResponse> GetSortedPerson(List<ServiceContracts.Dto.PersonDto.PersonResponse> allPerson, string sortby, SortOrderOptions sortOrder)
         {
             if (string.IsNullOrWhiteSpace(sortby))
@@ -205,20 +241,30 @@ namespace BussinessLogicService
 
             return sortedPerson;
         }
-
+        #endregion
+        #region UpdatePerson
+        /// <summary>
+        /// Updates the details of an existing person.
+        /// </summary>
+        /// <param name="personUpdateRequest">The updated person details.</param>
+        /// <returns>A PersonResponse object containing the updated details.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the update request is null.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when the person to update is not found.</exception>
         public PersonResponse UpdatePerson(PersonUpdateRequest? personUpdateRequest)
         {
-            if(personUpdateRequest == null)
+            if (personUpdateRequest == null)
                 throw new ArgumentNullException(nameof(personUpdateRequest), "Person update request cannot be null.");
 
             // Validate the input
             ModelValidation.ValidateRequest(personUpdateRequest);
 
+            // Find the person to update
             var updated_person = _persons.FirstOrDefault(temp => temp.PersonId == personUpdateRequest.PersonId);
 
             if (updated_person == null)
                 throw new KeyNotFoundException($"Person with ID {personUpdateRequest.PersonId} not found.");
 
+            // Update the person's details
             updated_person.PersonName = personUpdateRequest.PersonName;
             updated_person.Email = personUpdateRequest.Email;
             updated_person.BirthDay = personUpdateRequest.BirthDay;
@@ -226,8 +272,25 @@ namespace BussinessLogicService
             updated_person.CountryName = personUpdateRequest.CountryName;
             updated_person.ReceiveNewsLetters = personUpdateRequest.ReceiveNewsLetters;
 
+            // Convert the updated person model to a response DTO
             return updated_person.ToPersonResponse();
-
         }
+        #endregion
+        #region DeletePerson
+        public bool DeletePerson(Guid? personId)
+        {
+            if(Guid.Empty == personId)
+                throw new ArgumentNullException(nameof(personId), "Person ID cannot be null or empty.");
+
+            // Find the person to delete
+            var personToDelete = _persons.FirstOrDefault(x => x.PersonId == personId);
+
+            if (personToDelete == null)
+                return false;
+
+            _persons.Remove(personToDelete);
+            return true;
+        }
+        #endregion
     }
 }
